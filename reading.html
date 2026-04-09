@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baca Al-Quran (Pemula)</title>
+    <!-- Google Fonts untuk tipografi yang lebih baik dan teks Arab yang jernih -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        arabic: ['"Amiri Quran"', 'serif'],
+                    },
+                    colors: {
+                        // Palet terinspirasi dari Radix UI warna Sage dan Teal
+                        radix: {
+                            sage1: '#fcfcfc',
+                            sage2: '#f6f6f6',
+                            sage3: '#f0f0f0',
+                            sage4: '#e8e8e8',
+                            sage5: '#e0e0e0',
+                            sage6: '#d9d9d9',
+                            sage7: '#cecece',
+                            sage8: '#bbbbbb',
+                            sage9: '#8d8d8d',
+                            sage10: '#838383',
+                            sage11: '#646464',
+                            sage12: '#202020',
+                            teal1: '#f8fdfc',
+                            teal2: '#f0fbf9',
+                            teal3: '#e1f5f2',
+                            teal4: '#cdf0ea',
+                            teal5: '#b7e8df',
+                            teal6: '#9bdad0',
+                            teal7: '#75c7ba',
+                            teal8: '#4db0a1',
+                            teal9: '#12a594',
+                            teal10: '#0d9b8a',
+                            teal11: '#008474',
+                            teal12: '#0d3d38',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: theme('colors.radix.sage2'); color: theme('colors.radix.sage12'); }
+        .arabic-text { font-family: '"Amiri Quran"', serif; line-height: 2.2; }
+        
+        /* Transliteration Styling Override */
+        u { text-decoration-color: theme('colors.radix.teal9'); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+        strong { color: theme('colors.radix.teal10'); font-weight: 600; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: theme('colors.radix.sage2'); }
+        ::-webkit-scrollbar-thumb { background: theme('colors.radix.sage6'); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: theme('colors.radix.sage8'); }
+
+        /* Loader */
+        .spinner {
+            border: 3px solid rgba(0,0,0,0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border-left-color: theme('colors.radix.teal9');
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Animations */
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Select Dropdown Styling */
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23646464' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+        }
+        
+        /* Arabic Only Mode */
+        .arabic-only .ayah-details { display: none !important; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="w-full bg-white/80 backdrop-blur-md border-b border-radix-sage4 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-radix-teal3 p-2 rounded-xl text-radix-teal11">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-radix-sage12">Quran Reader</h1>
+                    <p class="text-xs text-radix-sage11 font-medium">Panduan Membaca Pemula</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                <!-- Toggle Switch -->
+                <div class="flex items-center gap-3 bg-radix-sage1 px-4 py-2 rounded-xl border border-radix-sage4 shadow-sm w-full sm:w-auto justify-between sm:justify-start">
+                    <span class="text-sm font-semibold text-radix-sage11">Mode Arab</span>
+                    <button id="mode-toggle" type="button" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-radix-sage6 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-radix-teal9" role="switch" aria-checked="false">
+                        <span id="toggle-knob" aria-hidden="true" class="translate-x-0 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                    </button>
+                </div>
+                
+                <div class="relative w-full sm:w-72">
+                    <select id="surah-select" class="block w-full pl-4 pr-10 py-2.5 text-sm sm:text-base border border-radix-sage5 rounded-xl bg-radix-sage1 hover:bg-white focus:outline-none focus:ring-2 focus:ring-radix-teal6 focus:border-radix-teal9 transition-all appearance-none cursor-pointer shadow-sm text-radix-sage12 font-medium opacity-0">
+                    <option value="" disabled selected>Pilih Surah...</option>
+                </select>
+                <div id="select-loader" class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                    <div class="w-4 h-4 border-2 border-radix-sage5 border-t-radix-teal9 rounded-full animate-spin"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        
+        <!-- Loading State -->
+        <div id="loading" class="flex flex-col items-center justify-center py-32 text-radix-sage10">
+            <div class="spinner mb-6"></div>
+            <p class="font-medium animate-pulse">Mengunduh Mushaf Al-Quran...</p>
+        </div>
+        
+        <!-- Error State -->
+        <div id="error" class="hidden my-12 p-6 bg-red-50 border border-red-200 rounded-2xl text-center text-red-600 shadow-sm max-w-lg mx-auto"></div>
+
+        <!-- Surah Container -->
+        <div id="surah-content" class="hidden">
+            <!-- Surah Header Card -->
+            <div class="text-center mb-12 fade-in" style="animation-delay: 100ms;">
+                <div class="bg-gradient-to-br from-radix-teal9 to-radix-teal11 p-8 sm:p-12 rounded-3xl shadow-lg relative overflow-hidden text-white">
+                    <!-- Decorative background pattern -->
+                    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(white 2px, transparent 2px); background-size: 24px 24px;"></div>
+                    
+                    <div class="relative z-10">
+                        <h2 id="surah-name" class="text-4xl sm:text-5xl font-bold mb-3 drop-shadow-sm"></h2>
+                        <p id="surah-meaning" class="text-radix-teal2 text-lg sm:text-xl font-medium mb-6"></p>
+                        
+                        <div class="flex items-center justify-center gap-4 text-sm font-medium">
+                            <span id="surah-type" class="bg-white/20 px-4 py-1.5 rounded-full backdrop-blur-sm"></span>
+                            <span class="bg-white/20 w-1.5 h-1.5 rounded-full"></span>
+                            <span class="bg-white/20 px-4 py-1.5 rounded-full backdrop-blur-sm"><span id="surah-ayat-count"></span> Ayat</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bismillah -->
+            <div id="bismillah" class="hidden text-center mb-10 mt-8 fade-in" style="animation-delay: 200ms;">
+                <p class="arabic-text text-3xl sm:text-4xl text-radix-sage12 py-6 bg-white rounded-2xl shadow-sm border border-radix-sage4">
+                    بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+                </p>
+            </div>
+
+            <!-- Ayahs List -->
+            <div id="ayahs-container" class="space-y-6 sm:space-y-8 pb-12">
+                <!-- Ayah cards injected here -->
+            </div>
+        </div>
+        
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full bg-white border-t border-radix-sage5 py-8 mt-auto">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <p class="text-radix-sage10 text-sm font-medium">
+                Desain responsif dan modern untuk memudahkan pembaca pemula. Data oleh API 
+                <a href="https://github.com/bachors/Al-Quran-ID-API" class="text-radix-teal9 hover:text-radix-teal10 hover:underline transition-colors" target="_blank" rel="noopener noreferrer">Bachors</a>.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Application Script -->
+    <script>
+        const API_URL = 'https://raw.githubusercontent.com/bachors/Al-Quran-ID-API/refs/heads/master/offline/data.json';
+        let quranData = [];
+        
+        const ui = {
+            loading: document.getElementById('loading'),
+            error: document.getElementById('error'),
+            surahContent: document.getElementById('surah-content'),
+            surahSelect: document.getElementById('surah-select'),
+            selectLoader: document.getElementById('select-loader'),
+            surahName: document.getElementById('surah-name'),
+            surahMeaning: document.getElementById('surah-meaning'),
+            surahType: document.getElementById('surah-type'),
+            surahAyatCount: document.getElementById('surah-ayat-count'),
+            bismillah: document.getElementById('bismillah'),
+            ayahsContainer: document.getElementById('ayahs-container'),
+            modeToggle: document.getElementById('mode-toggle'),
+            toggleKnob: document.getElementById('toggle-knob'),
+        };
+        
+        let isArabicOnly = false;
+
+        async function initApp() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                quranData = await response.json();
+                
+                populateSelect();
+                
+                // Remove App loading state
+                ui.loading.classList.add('hidden');
+                ui.selectLoader.classList.add('hidden');
+                ui.surahSelect.classList.remove('opacity-0');
+                
+                // Setup Toggle Listener
+                ui.modeToggle.addEventListener('click', toggleArabicMode);
+                
+                // Select Surah Al-Fatihah initially
+                ui.surahSelect.value = 0;
+                renderSurah(quranData[0]);
+                
+            } catch (error) {
+                ui.loading.classList.add('hidden');
+                ui.selectLoader.classList.add('hidden');
+                ui.error.classList.remove('hidden');
+                ui.error.innerHTML = `
+                    <svg class="w-10 h-10 mx-auto mb-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <p class="font-semibold text-lg mb-1">Gagal memuat data!</p>
+                    <p class="text-red-500/80 text-sm">Silakan periksa koneksi internet Anda dan muat ulang halaman.</p>
+                `;
+                console.error(error);
+            }
+        }
+
+        function toggleArabicMode() {
+            isArabicOnly = !isArabicOnly;
+            
+            if (isArabicOnly) {
+                ui.modeToggle.classList.replace('bg-radix-sage6', 'bg-radix-teal9');
+                ui.modeToggle.setAttribute('aria-checked', 'true');
+                ui.toggleKnob.classList.replace('translate-x-0', 'translate-x-5');
+                ui.ayahsContainer.classList.add('arabic-only');
+            } else {
+                ui.modeToggle.classList.replace('bg-radix-teal9', 'bg-radix-sage6');
+                ui.modeToggle.setAttribute('aria-checked', 'false');
+                ui.toggleKnob.classList.replace('translate-x-5', 'translate-x-0');
+                ui.ayahsContainer.classList.remove('arabic-only');
+            }
+        }
+
+        function populateSelect() {
+            quranData.forEach((surah, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${surah.nomor}. Surah ${surah.nama}`;
+                ui.surahSelect.appendChild(option);
+            });
+
+            ui.surahSelect.addEventListener('change', (e) => {
+                const selectedSurah = quranData[e.target.value];
+                if(selectedSurah) {
+                    renderSurah(selectedSurah);
+                }
+            });
+        }
+
+        function renderSurah(surah) {
+            // Hide briefly to trigger animations if we are reusing elements
+            ui.surahContent.classList.add('hidden');
+            ui.ayahsContainer.innerHTML = '';
+            
+            // Set Header Info
+            ui.surahName.textContent = surah.nama;
+            ui.surahMeaning.textContent = `Artinya: "${surah.arti}"`;
+            ui.surahType.textContent = surah.type === 'mekah' ? 'Makkiyyah' : 'Madaniyyah';
+            ui.surahAyatCount.textContent = surah.ayat.length;
+
+            // Bismillah condition: Show except for Al-Fatihah (1) and At-Tawbah (9)
+            if (surah.nomor !== "1" && surah.nomor !== "9") {
+                ui.bismillah.classList.remove('hidden');
+            } else {
+                ui.bismillah.classList.add('hidden');
+            }
+            
+            // Render Ayahs
+            surah.ayat.forEach((ayah, index) => {
+                const card = document.createElement('div');
+                card.className = `bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-radix-sage4 hover:border-radix-teal6/50 hover:shadow-md transition-all duration-300 fade-in group relative overflow-hidden`;
+                
+                // Staggered animation delay
+                const delay = Math.min(300 + (index * 50), 1000);
+                card.style.animationDelay = `${delay}ms`;
+                
+                card.innerHTML = `
+                    <!-- Decorative side band on hover -->
+                    <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-radix-teal9 opacity-0 group-hover:opacity-100 transition-opacity rounded-l-3xl"></div>
+                    
+                    <div class="flex flex-col gap-6 sm:gap-8">
+                        
+                        <!-- Header Ayah: Number & Arabic Text -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <!-- Number Badge -->
+                            <div class="flex-shrink-0 bg-radix-sage2 text-radix-sage11 border-2 border-radix-sage5 font-bold text-lg w-12 h-12 flex items-center justify-center rounded-2xl group-hover:bg-radix-teal3 group-hover:text-radix-teal11 group-hover:border-radix-teal5 transition-colors">
+                                ${ayah.nomor}
+                            </div>
+                            
+                            <!-- Arabic Text -->
+                            <div class="w-full text-right overflow-x-auto pb-2">
+                                <p class="arabic-text text-3xl sm:text-4xl text-radix-sage12" dir="rtl">${ayah.ar}</p>
+                            </div>
+                        </div>
+
+                        <!-- Content Ayah: Transliteration & Translation -->
+                        <div class="ayah-details flex flex-col gap-3 pt-6 border-t border-radix-sage4/60 transition-all duration-300">
+                            <!-- Transliteration for Beginners -->
+                            <div>
+                                <span class="text-xs uppercase tracking-wider font-bold text-radix-teal9 mb-1 block">Cara Baca (Latin)</span>
+                                <p class="text-radix-teal12 text-lg sm:text-xl font-medium leading-relaxed">${ayah.tr}</p>
+                            </div>
+                            
+                            <!-- Indonesian Translation -->
+                            <div class="mt-2 text-radix-sage11">
+                                <span class="text-xs uppercase tracking-wider font-bold text-radix-sage8 mb-1 block">Terjemahan</span>
+                                <p class="text-base sm:text-lg leading-relaxed">${ayah.id}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                ui.ayahsContainer.appendChild(card);
+            });
+
+            // Show and scroll to top
+            ui.surahContent.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize App on DOM Load
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
